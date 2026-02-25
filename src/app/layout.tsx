@@ -1,8 +1,8 @@
 // src/app/layout.tsx
 
 import type { Metadata } from 'next';
-import { Providers } from './providers'; // Theme provider
-import './globals.css'; // Global styles
+import { Providers } from './providers';
+import './globals.css';
 
 // Define site metadata
 export const metadata: Metadata = {

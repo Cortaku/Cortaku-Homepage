@@ -5,7 +5,8 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'rea
 import { useTheme } from 'next-themes';
 import {
   Sun, Moon, Tv, Utensils, Film, Youtube, MessageSquare,
-  Bot
+  Bot,
+  Dumbbell
 } from 'lucide-react';
 import JumpGame from '@/components/JumpGame';
 import CherryBlossomAnimation from '@/components/CherryBlossomAnimation';
@@ -118,10 +119,12 @@ AppCard.displayName = 'AppCard'; // For better debugging in React DevTools
 export default function HomePage() {
   // Page-specific constants and data
   const emailAddress = "jabroniwan@gmail.com";
-  const youtubeLink = "https://www.youtube.com/@cortaku"; 
+  const youtubeLink = "https://www.youtube.com/@cortaku";
+  const letterboxd = "https://letterboxd.com/ScreenPeeper/";
+  
   // App data for AppCards, memoized to prevent re-creation on every render of HomePage
   const apps = React.useMemo(() => [
-    { title: "Overseerr", linkUrl: "https://overseerr.cortaku.com", icon: Film, bgColorClass: "bg-pastel-pink", iconColorClass: "text-rose-500 dark:text-pastel-pink" },
+    { title: "Fitness", linkUrl: "https://sparky.cortaku.com", icon: Dumbbell, bgColorClass: "bg-pastel-pink", iconColorClass: "text-rose-500 dark:text-pastel-pink" },
     { title: "Mealie", linkUrl: "https://mealie.cortaku.com", icon: Utensils, bgColorClass: "bg-pastel-green", iconColorClass: "text-emerald-600 dark:text-pastel-green" },
     { title: "Plex", linkUrl: "https://plex.cortaku.com/web/index.html", icon: Tv, bgColorClass: "bg-pastel-blue", iconColorClass: "text-sky-600 dark:text-pastel-blue" },
   ], []);
@@ -207,7 +210,7 @@ export default function HomePage() {
       }
       return next;
     });
-  }, []); // audioRef is stable, no other dependencies from component scope
+  }, []);
 
   // Functions to control JumpGame visibility and related side-effects
   const startGame = () => {
@@ -468,6 +471,7 @@ export default function HomePage() {
             <div className="flex space-x-4">
               <a href={`mailto:${emailAddress}`} aria-label="Email" className="text-text-muted-light dark:text-text-muted-dark hover:text-pastel-purple transition duration-300"><MessageSquare className="w-5 h-5" /></a>
               <a href={youtubeLink} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-text-muted-light dark:text-text-muted-dark hover:text-red-400 transition duration-300"><Youtube className="w-5 h-5" /></a>
+              <a href={letterboxd} target="_blank" rel="noopener noreferrer" aria-label="Letterboxd" className="text-text-muted-light dark:text-text-muted-dark hover:text-red-400 transition duration-300"><Film className="w-5 h-5" /></a>
             </div>
             <ThemeSwitcher onThemeToggle={handleThemeToggle} />
           </footer>

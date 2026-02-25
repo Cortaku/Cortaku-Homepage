@@ -27,7 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // attribute="class" enables class-based dark mode (works with Tailwind's darkMode: 'class')
     // defaultTheme="light" sets light mode as the initial theme
     // enableSystem={false} prevents overriding the default with the system preference
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       {children}
     </ThemeProvider>
   );
