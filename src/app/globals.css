@@ -1,12 +1,63 @@
 /* styles/globals.css */
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* --- GLOBAL HTML & BODY STYLES --- */
-html {
-  /* Base HTML styling. */
+@theme {
+  /* Pastel Color Palette */
+  --color-pastel-pink: #fecdd3;
+  --color-pastel-blue: #bfdbfe;
+  --color-pastel-green: #bbf7d0;
+  --color-pastel-purple: #e9d5ff;
+  --color-pastel-yellow: #fef08a;
+
+  /* Text Colors */
+  --color-text-main-light: #4b5563;
+  --color-text-main-dark: #d1d5db;
+  --color-text-muted-light: #6b7280;
+  --color-text-muted-dark: #9ca3af;
+
+  /* Background Colors */
+  --color-bg-light: #fdfdff;
+  --color-bg-dark: #2c3e50;
+
+  /* Card Colors */
+  --color-card-light: #ffffff;
+  --color-card-dark: #34495e;
+
+  /* UI Element Colors */
+  --color-icon-bg-light: rgba(191, 219, 254, 0.3);
+  --color-icon-bg-dark: rgba(233, 213, 255, 0.2);
+  --color-button-light: #a5b4fc;
+  --color-button-hover-light: #818cf8;
+  --color-button-dark: #c7d2fe;
+  --color-button-hover-dark: #a5b4fc;
+  --color-button-text: #1e1b4b;
+  --color-blossom: #fbcfe8;
+
+  /* Emoji-friendly Font Stack */
+  --font-sans: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  --animate-float: crazy-rainbow 4s ease-in-out infinite alternate;
+  
+  /* 2. Define heavy translation, rotation, and scaling */
+  @keyframes crazy-rainbow {
+    0%   { transform: translate(0px, 0px) rotate(0deg) scale(0.8); }
+    25%  { transform: translate(100px, -150px) rotate(180deg) scale(1.5); }
+    50%  { transform: translate(-120px, 100px) rotate(360deg) scale(0.5); }
+    75%  { transform: translate(150px, 150px) rotate(540deg) scale(1.8); }
+    100% { transform: translate(-100px, -200px) rotate(720deg) scale(1.2); }
+  }
+}
+
+/* Custom Text Shadow Utilities */
+@utility text-shadow {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+@utility text-shadow-md {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+@utility text-shadow-lg {
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 body {
