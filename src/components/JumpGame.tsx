@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-// Import your new Postgres server actions!
-import { getTopScores, saveHighScore } from '@/actions/highscores';
+
 
 // --------------- INTERFACES ---------------
 interface Obstacle {
@@ -179,17 +178,32 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
   // --------------- LEADERBOARD ACTIONS ---------------
   useEffect(() => {
     if (showLeaderboard) {
-      getTopScores().then(setLeaderboardData);
+      // NOTE: Replace this URL with your actual future tunnel URL!
+      fetch('https://api.cortaku.com/api/highscores')
+        .then(res => res.json())
+        .then(data => setLeaderboardData(data))
+        .catch(err => console.error("Failed to load leaderboard", err));
     }
   }, [showLeaderboard]);
 
   const handleSaveScore = async () => {
     if (!playerName.trim() || !newHighScoreObj) return;
     setIsSubmitting(true);
-    await saveHighScore(playerName.trim(), newHighScoreObj.score);
+    
+    try {
+      // NOTE: Replace this URL with your actual future tunnel URL!
+      await fetch('https://api.cortaku.com/api/highscores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName: playerName.trim(), score: newHighScoreObj.score })
+      });
+    } catch (err) {
+      console.error("Failed to save score", err);
+    }
+
     setIsSubmitting(false);
-    setNewHighScoreObj(null); // Close the celebration overlay
-    setShowLeaderboard(true); // Pop open the leaderboard!
+    setNewHighScoreObj(null);
+    setShowLeaderboard(true); 
   };
 
   // --------------- CORE GAME ACTIONS ---------------
