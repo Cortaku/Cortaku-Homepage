@@ -71,7 +71,7 @@ body {
   touch-action: manipulation;
 }
 
-/* --- APP CARD STYLES --- */
+
 /* Defines a custom hover cursor for AppCard links. */
 .app-card-link:hover {
   /* Rotated keyblade cursor for app card hover state. */
