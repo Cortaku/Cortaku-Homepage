@@ -1,4 +1,4 @@
-# Cortaku Homepage
+# Cortaku Homepage (www.cortaku.com)
 
 A highly customized, self-hosted personal dashboard built with modern web technologies. Designed to serve as a beautiful landing page for homelab services, complete with interactive UI elements, Easter eggs, and a hidden mini-game.
 
