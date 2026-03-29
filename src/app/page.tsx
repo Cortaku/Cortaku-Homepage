@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useMemo } from 'react';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, Tv, Utensils, Film, Youtube, MessageSquare, Bot, Dumbbell } from 'lucide-react';
+import { Sun, Moon, Tv, Utensils, Film, Youtube, MessageSquare, Bot, Dumbbell, Instagram, Book, Wrench, Camera, Music } from 'lucide-react';
 import JumpGame from '@/components/JumpGame';
 import CherryBlossomAnimation from '@/components/CherryBlossomAnimation';
 
@@ -68,7 +68,7 @@ const AppCard = forwardRef<HTMLAnchorElement, {
   return (
     <a
       ref={ref} href={linkUrl} target="_blank" rel="noopener noreferrer"
-      className="app-card-link bg-card-light dark:bg-card-dark rounded-xl shadow-lg flex flex-col p-6 text-center items-center aspect-square justify-center group"
+      className="app-card-link bg-card-light dark:bg-card-dark rounded-xl shadow-lg flex flex-col p-4 sm:p-6 text-center items-center aspect-square justify-center group"
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setRotate({ x: 0, y: 0 }); }}
@@ -80,11 +80,11 @@ const AppCard = forwardRef<HTMLAnchorElement, {
       }}
     >
       <div className="app-card-inner pointer-events-none">
-        <div className={`icon-wrapper p-5 rounded-full transition-colors duration-300 ${bgWrapperClass}`}>
+        <div className={`icon-wrapper p-4 sm:p-5 rounded-full transition-colors duration-300 ${bgWrapperClass}`}>
           <Icon className={`w-10 h-10 sm:w-12 sm:h-12 transition-colors duration-300 ${iconColorClass}`} />
         </div>
-        <div className="title-wrapper mt-4">
-          <h3 className="text-lg font-semibold text-text-main-light dark:text-text-main-dark transition-colors duration-300">{title}</h3>
+        <div className="title-wrapper mt-3 sm:mt-4">
+          <h3 className="text-base sm:text-lg font-semibold text-text-main-light dark:text-text-main-dark transition-colors duration-300">{title}</h3>
         </div>
       </div>
     </a>
@@ -99,6 +99,7 @@ export default function HomePage() {
   const emailAddress = "jabroniwan@gmail.com";
   const youtubeLink = "https://www.youtube.com/@cortaku";
   const letterboxd = "https://letterboxd.com/ScreenPeeper/";
+  const instagram = "https://www.instagram.com/cort.uwu/";
 
 const apps = useMemo(() => [
     { 
@@ -113,7 +114,7 @@ const apps = useMemo(() => [
       linkUrl: "https://mealie.cortaku.com", 
       icon: Utensils, 
       bgWrapperClass: "bg-pastel-green/30 dark:bg-pastel-green/20 group-hover:bg-pastel-green/50 dark:group-hover:bg-pastel-green/30", 
-      iconColorClass: "text-emerald-600 dark:text-pastel-green" 
+      iconColorClass: "text-green-600 dark:text-pastel-green" 
     },
     { 
       title: "Plex", 
@@ -121,6 +122,27 @@ const apps = useMemo(() => [
       icon: Tv, 
       bgWrapperClass: "bg-pastel-blue/30 dark:bg-pastel-blue/20 group-hover:bg-pastel-blue/50 dark:group-hover:bg-pastel-blue/30", 
       iconColorClass: "text-sky-600 dark:text-pastel-blue" 
+    },
+    { 
+      title: "Audiobooks", 
+      linkUrl: "https://books.cortaku.com", 
+      icon: Book, 
+      bgWrapperClass: "bg-pastel-purple/30 dark:bg-pastel-purple/20 group-hover:bg-pastel-purple/50 dark:group-hover:bg-pastel-purple/30", 
+      iconColorClass: "text-violet-600 dark:text-pastel-purple" 
+    },
+    { 
+      title: "Photos", 
+      linkUrl: "https://photos.cortaku.com",
+      icon: Camera,
+      bgWrapperClass: "bg-pastel-yellow/30 dark:bg-pastel-yellow/20 group-hover:bg-pastel-yellow/50 dark:group-hover:bg-pastel-yellow/30", 
+      iconColorClass: "text-yellow-600 dark:text-pastel-yellow" 
+    },
+    { 
+      title: "Music", 
+      linkUrl: "https://music.cortaku.com",
+      icon: Music,
+      bgWrapperClass: "bg-pastel-pink/30 dark:bg-pastel-pink/20 group-hover:bg-pastel-pink/50 dark:group-hover:bg-pastel-pink/30", 
+      iconColorClass: "text-pink-400 dark:text-pastel-pink" 
     },
   ], []);
 
@@ -134,7 +156,7 @@ const apps = useMemo(() => [
   const audioRef = useRef<HTMLAudioElement>(null);
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   
-  // High-performance particle storage
+  // Canvas particle storage
   const particlesRef = useRef<Particle[]>([]);
   const mousePos = useRef({ x: 0, y: 0 });
   
@@ -157,7 +179,7 @@ const apps = useMemo(() => [
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
-    handleResize(); // Set initial size
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -177,15 +199,12 @@ const apps = useMemo(() => [
     const animate = () => {
       if (!ctx || !canvas || showGame) return;
 
-      // Clear the canvas for the next frame
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Update and draw each particle
       particlesRef.current = particlesRef.current.filter(p => {
         p.x += p.vx;
         p.y += p.vy;
 
-        // Bounce off edges
         if (p.x <= 0 || p.x >= canvas.width) p.vx *= -1;
         if (p.y <= 0 || p.y >= canvas.height) p.vy *= -1;
 
@@ -198,9 +217,9 @@ const apps = useMemo(() => [
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
           ctx.fill();
-          return true; // Keep particle
+          return true;
         }
-        return false; // Remove dead particle
+        return false;
       });
 
       animationFrameId = requestAnimationFrame(animate);
@@ -227,21 +246,30 @@ const apps = useMemo(() => [
 
     const showBot = () => {
       const cards = cardRefs.current.filter(Boolean);
-      const target = cards[Math.floor(Math.random() * cards.length)];
-      if (!target || !containerRef.current) return;
+      if (cards.length === 0 || !containerRef.current) return;
+      
+      const isMobile = window.innerWidth < 768; 
+      
+      // On mobile, only use the first card. On desktop, pick randomly.
+      const target = isMobile ? cards[0] : cards[Math.floor(Math.random() * cards.length)];
+      if (!target) return;
 
       const cardRect = target.getBoundingClientRect();
       const containerRect = containerRef.current.getBoundingClientRect();
+
+      const botWidth = 80;
+      const maxLeftOffset = Math.max(0, cardRect.width - botWidth);
+      const randomXOffset = Math.random() * maxLeftOffset;
+
       setIdleBotState({
         status: 'visible',
         top: cardRect.top - containerRect.top - 15,
-        left: cardRect.left - containerRect.left + cardRect.width / 2
+        left: cardRect.left - containerRect.left + randomXOffset
       });
     };
 
     const resetIdleTimer = () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-      // We check the ref here instead of the state to prevent infinite loops!
       if (idleBotStatusRef.current === 'visible') hideBot();
       idleTimerRef.current = setTimeout(showBot, IDLE_TIMEOUT);
     };
@@ -331,13 +359,12 @@ const apps = useMemo(() => [
       className={`relative min-h-screen w-full max-w-screen overflow-x-hidden flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden ${showRainbow ? 'bg-rainbow' : 'bg-bg-light dark:bg-bg-dark'} text-text-main-light dark:text-text-main-dark`}
       style={{ touchAction: 'none' }}
     >
-      {/* High-Performance Canvas for Particles */}
       <canvas 
         ref={canvasRef} 
         className="absolute inset-0 pointer-events-none z-5"
       />
 
-      {/* Rainbow Easter Egg */}
+      {/* Theme switch Easter Egg */}
       {showRainbow ? (
         <>
           <div className="absolute inset-0 bg-white animate-flashRainbow z-40 pointer-events-none" />
@@ -346,9 +373,8 @@ const apps = useMemo(() => [
           </div>
           <div className="absolute inset-0 z-40 pointer-events-none">
                       {Array.from({ length: 20 }).map((_, i) => {
-                        // Generate random values for maximum chaos
-                        const randomDuration = Math.random() * 3 + 2; // Speed between 2s and 5s
-                        const randomDelay = Math.random() * -5; // Negative delay so they start instantly out-of-sync
+                        const randomDuration = Math.random() * 3 + 2;
+                        const randomDelay = Math.random() * -5;
                         const randomDirection = Math.random() > 0.5 ? 'alternate' : 'alternate-reverse';
 
                         return (
@@ -392,10 +418,8 @@ const apps = useMemo(() => [
 
       {/* Main Content */}
       {showGame ? (
-        <div className="w-full h-full flex items-center justify-center cursor-default z-20">
-          <div className="rotate-landscape-wrapper"> 
-            <JumpGame onExit={() => setShowGame(false)} gameTheme={theme === 'dark' ? 'night' : 'day'} />
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black touch-none h-[100dvh] w-screen overflow-hidden">
+          <JumpGame onExit={() => setShowGame(false)} gameTheme={theme === 'dark' ? 'night' : 'day'} />
         </div>
       ) : (
         <>
@@ -407,9 +431,9 @@ const apps = useMemo(() => [
             Cortaku
           </h1>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-xl w-full z-20 relative mobile-card-stack">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-xl w-full z-20 relative mobile-card-stack">
             {apps.map((app, index) => (
-              <div className="scale-90 sm:scale-100 transition-transform" key={app.title}>
+              <div className="transition-transform" key={app.title}>
                 <AppCard {...app} ref={el => { cardRefs.current[index] = el; }} />
               </div>
             ))}
@@ -420,6 +444,7 @@ const apps = useMemo(() => [
               <a href={`mailto:${emailAddress}`} aria-label="Email" className="text-text-muted-light dark:text-text-muted-dark hover:text-pastel-purple transition duration-300"><MessageSquare className="w-5 h-5" /></a>
               <a href={youtubeLink} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-text-muted-light dark:text-text-muted-dark hover:text-red-400 transition duration-300"><Youtube className="w-5 h-5" /></a>
               <a href={letterboxd} target="_blank" rel="noopener noreferrer" aria-label="Letterboxd" className="text-text-muted-light dark:text-text-muted-dark hover:text-red-400 transition duration-300"><Film className="w-5 h-5" /></a>
+              <a href={instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-text-muted-light dark:text-text-muted-dark hover:text-pastel-purple transition duration-300"><Instagram className="w-5 h-5" /></a>
             </div>
             <ThemeSwitcher onThemeToggle={handleThemeToggle} />
           </footer>

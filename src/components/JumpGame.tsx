@@ -2,7 +2,6 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 
-
 // --------------- INTERFACES ---------------
 interface Obstacle {
   id: number;
@@ -47,11 +46,11 @@ const INITIAL_GAME_SPEED_PPS = 5 * TARGET_FPS_FOR_ORIGINAL_BALANCE;
 const MAX_GAME_SPEED_PPS = 100 * TARGET_FPS_FOR_ORIGINAL_BALANCE;
 const GAME_SPEED_INCREMENT_PPS = 1.4 * TARGET_FPS_FOR_ORIGINAL_BALANCE;
 
-// --- NEW PRECISION HITBOX SCALES ---
-const ROBOT_HITBOX_SCALE_X = 0.5;    // Robot is skinny; ignore 50% of horizontal sprite width
-const ROBOT_HITBOX_SCALE_Y = 0.85;   // Shave a tiny bit off the top antenna and bottom feet
-const OBSTACLE_HITBOX_SCALE_X = 0.5; // Emojis have massive invisible side padding
-const OBSTACLE_HITBOX_SCALE_Y = 0.6; // Emojis have a lot of invisible top padding
+// --- PRECISION HITBOX SCALES ---
+const ROBOT_HITBOX_SCALE_X = 0.5;    
+const ROBOT_HITBOX_SCALE_Y = 0.85;   
+const OBSTACLE_HITBOX_SCALE_X = 0.5; 
+const OBSTACLE_HITBOX_SCALE_Y = 0.6; 
 
 const exitButtonConfig = {
   radius: 25,
@@ -70,8 +69,10 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
     typeof window !== 'undefined' ? Number(localStorage.getItem('highScore') || '0') : 0
   );
   const [currentBackgroundSet, setCurrentBackgroundSet] = useState<number>(1);
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [viewportDims, setViewportDims] = useState({ w: 0, h: 0 });
 
-  // --- NEW: Leaderboard & Celebration State ---
+  // --- Leaderboard & Celebration State ---
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState<HighScore[]>([]);
   const [newHighScoreObj, setNewHighScoreObj] = useState<{score: number} | null>(null);
@@ -132,20 +133,17 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
   const getRandomFontSize = useCallback(() => Math.random() * 32 + 24, []);
 
   const isCollision = useCallback((r: { x: number, y: number, width: number, height: number }, o: Obstacle): boolean => {
-      // 1. Calculate tightened Robot Hitbox
       const rx = r.x + (r.width * (1 - ROBOT_HITBOX_SCALE_X) / 2);
       const ry = r.y + (r.height * (1 - ROBOT_HITBOX_SCALE_Y) / 2);
       const rw = r.width * ROBOT_HITBOX_SCALE_X;
       const rh = r.height * ROBOT_HITBOX_SCALE_Y;
       
-      // 2. Calculate tightened Obstacle Hitbox
       const obstacleVisualTopY = groundY + robot.current.height - o.height;
       const ox = o.x + (o.width * (1 - OBSTACLE_HITBOX_SCALE_X) / 2);
       const oy = obstacleVisualTopY + (o.height * (1 - OBSTACLE_HITBOX_SCALE_Y) / 2);
       const ow = o.width * OBSTACLE_HITBOX_SCALE_X;
       const oh = o.height * OBSTACLE_HITBOX_SCALE_Y;
       
-      // 3. Check if the newly shrunken boxes overlap
       return (
         rx < ox + ow && rx + rw > ox &&
         ry < oy + oh && ry + rh > oy
@@ -162,15 +160,17 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
   }, [onExit]);
   
   const getLogicalCoordinates = useCallback((clientX: number, clientY: number, currentCanvas: HTMLCanvasElement, rect: DOMRect) => {
-    const css_x = clientX - rect.left; const css_y = clientY - rect.top;
+    const css_x = clientX - rect.left; 
+    const css_y = clientY - rect.top;
     let logicalX: number, logicalY: number;
     const isViewportPortrait = window.innerHeight > window.innerWidth;
+    
     if (isViewportPortrait) {
-        logicalX = (1 - css_y / rect.height) * GAME_INTERNAL_WIDTH;
-        logicalY = (css_x / rect.width) * GAME_INTERNAL_HEIGHT;
+        logicalX = (css_y / rect.height) * GAME_INTERNAL_WIDTH;
+        logicalY = (1 - css_x / rect.width) * GAME_INTERNAL_HEIGHT;
     } else {
-        logicalX = css_x * (GAME_INTERNAL_WIDTH / rect.width);
-        logicalY = css_y * (GAME_INTERNAL_HEIGHT / rect.height);
+        logicalX = (css_x / rect.width) * GAME_INTERNAL_WIDTH;
+        logicalY = (css_y / rect.height) * GAME_INTERNAL_HEIGHT;
     }
     return { logicalX, logicalY };
   }, []);
@@ -178,7 +178,6 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
   // --------------- LEADERBOARD ACTIONS ---------------
   useEffect(() => {
     if (showLeaderboard) {
-      // NOTE: Replace this URL with your actual future tunnel URL!
       fetch('https://api.cortaku.com/api/highscores')
         .then(res => res.json())
         .then(data => setLeaderboardData(data))
@@ -191,7 +190,6 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
     setIsSubmitting(true);
     
     try {
-      // NOTE: Replace this URL with your actual future tunnel URL!
       await fetch('https://api.cortaku.com/api/highscores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -293,7 +291,7 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
     // Handle "Start Game" Screen
     if (!gameStartedRef.current) {
         ctx.font = '48px monospace';
-        ctx.fillStyle = currentTheme === 'day' ? '#333333' : '#FFFFFF';
+        ctx.fillStyle = currentTheme === 'day' ? '#000000' : '#FFFFFF';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('Start Game', GAME_INTERNAL_WIDTH / 2, GAME_INTERNAL_HEIGHT / 2 - 30);
         ctx.font = '24px monospace';
@@ -336,12 +334,11 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
                 fadeOpacityRef.current = 0;
                 if (deathAudioRef.current) { deathAudioRef.current.currentTime = 0; deathAudioRef.current.play().catch(e => console.error("Death sound error:", e));}
                 
-                // --- TRIGGER THE CELEBRATION! ---
                 if (scoreRef.current > highScore) { 
                   const newHS = Math.floor(scoreRef.current); 
                   setHighScore(newHS); 
                   localStorage.setItem('highScore', String(newHS));
-                  setNewHighScoreObj({ score: newHS }); // This triggers the HTML overlay!
+                  setNewHighScoreObj({ score: newHS }); 
                 }
             }
         }
@@ -367,8 +364,9 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
     ctx.beginPath(); ctx.moveTo(btnX - xOff, btnY - xOff); ctx.lineTo(btnX + xOff, btnY + xOff);
     ctx.moveTo(btnX + xOff, btnY - xOff); ctx.lineTo(btnX - xOff, btnY + xOff); ctx.stroke(); ctx.restore();
 
+    // UPDATED: Ground is now white for better contrast
     const tileW = 40; const groundTopY = groundY + robot.current.height;
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = '#E8E8E8';
     for (let xP = groundOffset.current - tileW; xP < GAME_INTERNAL_WIDTH; xP += tileW) { ctx.fillRect(Math.floor(xP), groundTopY, tileW - 4, 14); }
     
     for (let i = 0; i < obstaclesRef.current.length; i++) {
@@ -384,20 +382,19 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
     }
 
     if (gameOverRef.current && youDiedImageRef.current) {
-        fadeOpacityRef.current = Math.min(fadeOpacityRef.current + (0.5 * deltaTimeSeconds), 1);
+        fadeOpacityRef.current = Math.min(fadeOpacityRef.current + (0.5 * deltaTimeSeconds), 0.8);
         const iW = 500, iH = 180; const dX = GAME_INTERNAL_WIDTH / 2 - iW / 2; const dY = GAME_INTERNAL_HEIGHT / 2 - iH / 2 - 20;
         const msg = window.innerWidth < 600 ? 'Tap to play again' : 'Press SPACE to play again';
         ctx.save(); ctx.globalAlpha = fadeOpacityRef.current;
         ctx.drawImage(youDiedImageRef.current, dX, dY, iW, iH);
         ctx.font = window.innerWidth < 600 ? '18px monospace' : '24px monospace';
-        ctx.textAlign = 'center'; ctx.fillStyle = currentTheme === 'day' ? '#333333' : '#FFFFFF';
+        ctx.textAlign = 'center'; ctx.fillStyle = currentTheme === 'day' ? '#ffffff' : '#FFFFFF';
         ctx.fillText(msg, GAME_INTERNAL_WIDTH / 2, dY + iH + 40); ctx.restore();
     }
   }, [groundY, isCollision, getRandomFontSize, getRandomSpawnDelay, highScore]); 
 
-  // --------------- EVENT HANDLERS (MEMOIZED) ---------------
+  // --------------- EVENT HANDLERS ---------------
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // If the user is typing their name or viewing the leaderboard, completely block game controls!
     if (newHighScoreObj || showLeaderboard) return;
 
     if (!gameStartedRef.current) {
@@ -412,7 +409,7 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
   }, [onExit, handleStartGame, resetGame, handleJump, newHighScoreObj, showLeaderboard]);
 
   const handleTouchStart = useCallback((event: TouchEvent) => {
-    if (newHighScoreObj || showLeaderboard) return; // Block controls during menus
+    if (newHighScoreObj || showLeaderboard) return; 
     if (!gameStartedRef.current) { handleStartGame(); return; }
     event.preventDefault(); 
     const currentCanvas = canvasRef.current; if (!currentCanvas) return;
@@ -426,7 +423,7 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
   }, [getLogicalCoordinates, requestExitWithDelay, resetGame, handleJump, handleStartGame, newHighScoreObj, showLeaderboard]);
 
   const handleCanvasClick = useCallback((event: MouseEvent) => {
-    if (newHighScoreObj || showLeaderboard) return; // Block controls during menus
+    if (newHighScoreObj || showLeaderboard) return; 
     if (!gameStartedRef.current) { handleStartGame(); return; }
     const currentCanvas = canvasRef.current; if (!currentCanvas) return;
     const rect = currentCanvas.getBoundingClientRect();
@@ -437,13 +434,32 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
 
   const handleResizeCanvas = useCallback(() => {
     const cvs = canvasRef.current; if (!cvs) return;
-    const vpW = window.innerWidth; const vpH = window.innerHeight;
-    const maxW = vpW * 0.90; const maxH = vpH * 0.90;
-    cvs.width = GAME_INTERNAL_WIDTH; cvs.height = GAME_INTERNAL_HEIGHT;
-    let sH = maxH; let sW = sH * GAME_ASPECT_RATIO;
-    if (sW > maxW) { sW = maxW; sH = sW / GAME_ASPECT_RATIO; }
-    sW = Math.max(1, Math.floor(sW)); sH = Math.max(1, Math.floor(sH));
-    cvs.style.width = `${sW}px`; cvs.style.height = `${sH}px`;
+    const vpW = window.innerWidth;
+    const vpH = window.innerHeight;
+    
+    const currentIsPortrait = vpH > vpW;
+    setIsPortrait(currentIsPortrait);
+    setViewportDims({ w: vpW, h: vpH });
+
+    const maxW = currentIsPortrait ? vpH : vpW;
+    const maxH = currentIsPortrait ? vpW : vpH;
+
+    cvs.width = GAME_INTERNAL_WIDTH;
+    cvs.height = GAME_INTERNAL_HEIGHT;
+
+    let sW = maxW;
+    let sH = sW / GAME_ASPECT_RATIO;
+
+    if (sH > maxH) {
+        sH = maxH;
+        sW = sH * GAME_ASPECT_RATIO;
+    }
+
+    sW = Math.max(1, Math.floor(sW));
+    sH = Math.max(1, Math.floor(sH));
+
+    cvs.style.width = `${sW}px`;
+    cvs.style.height = `${sH}px`;
     cvs.style.imageRendering = (sW > GAME_INTERNAL_WIDTH || sH > GAME_INTERNAL_HEIGHT) ? 'pixelated' : 'auto';
     const c = cvs.getContext('2d'); if (c) c.imageSmoothingEnabled = false;
   }, []);
@@ -485,7 +501,15 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
     document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden';
     
     handleResizeCanvas(); 
-    window.addEventListener('resize', handleResizeCanvas);
+
+    let resizeTimeout: NodeJS.Timeout;
+    const delayedResize = () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(handleResizeCanvas, 150);
+    };
+
+    window.addEventListener('resize', delayedResize);
+    window.addEventListener('orientationchange', delayedResize);
     window.addEventListener('keydown', handleKeyDown);
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('click', handleCanvasClick);
@@ -496,8 +520,10 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
     }
 
     return () => { 
-      window.removeEventListener('resize', handleResizeCanvas);
+      window.removeEventListener('resize', delayedResize);
+      window.removeEventListener('orientationchange', delayedResize);
       window.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(resizeTimeout);
       if (canvasRef.current) {
         canvasRef.current.removeEventListener('touchstart', handleTouchStart);
         canvasRef.current.removeEventListener('click', handleCanvasClick);
@@ -524,111 +550,117 @@ const JumpGame: React.FC<JumpGameProps> = ({ onExit, gameTheme }) => {
 
   // --------------- JSX RENDER ---------------
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-black relative">
-      <div className="jump-game-force-landscape-wrapper relative">
+    <div className="w-full h-full flex items-center justify-center bg-black relative overflow-hidden">
+      
+      {/* --- CANVAS WRAPPER (Handles Game Rotation Only) --- */}
+      <div 
+        className="absolute flex items-center justify-center origin-center transition-transform duration-300"
+        style={{
+          width: isPortrait ? `${viewportDims.h}px` : '100%',
+          height: isPortrait ? `${viewportDims.w}px` : '100%',
+          transform: isPortrait ? 'rotate(90deg)' : 'none',
+        }}
+      >
         <canvas 
             ref={canvasRef} 
-            className="jump-game-canvas-styles z-10" 
+            className="z-10" 
             width={GAME_INTERNAL_WIDTH} 
             height={GAME_INTERNAL_HEIGHT}
         />
-
-        {/* Floating Leaderboard Button (Only visible on Start Menu or Game Over) */}
-        {(!gameStarted || gameOver) && !newHighScoreObj && (
-          <button
-            onClick={(e) => { e.stopPropagation(); setShowLeaderboard(true); }}
-            className="absolute bottom-4 right-4 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full font-bold shadow-lg hover:scale-105 transition-transform z-40"
-          >
-            🏆 Leaderboard
-          </button>
-        )}
-
-        {/* --- THE CELEBRATION OVERLAY --- */}
-        {newHighScoreObj && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs">
-            
-            {/* Chaotic Floating Emojis Background */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              {[...Array(25)].map((_, i) => {
-                const randomDuration = Math.random() * 3 + 2; 
-                const randomDelay = Math.random() * -5;
-                return (
-                  <div key={i} className="absolute animate-float" style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    fontSize: `${Math.random() * 25 + 20}px`,
-                    animationDuration: `${randomDuration}s`,
-                    animationDelay: `${randomDelay}s`,
-                    animationDirection: Math.random() > 0.5 ? 'alternate' : 'alternate-reverse'
-                  }}>
-                    {['🎉', '✨', '🏆', '⭐', '🔥'][Math.floor(Math.random() * 5)]}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Input Form */}
-            <div className="bg-card-light dark:bg-card-dark p-6 sm:p-8 rounded-2xl shadow-2xl text-center z-10 w-[90%] max-w-sm border-4 border-yellow-400">
-              <h2 className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-500 mb-2 animate-pulse">
-                NEW HIGH SCORE!
-              </h2>
-              <p className="text-5xl font-bold text-text-main-light dark:text-text-main-dark mb-6">
-                {newHighScoreObj.score}
-              </p>
-
-              <input
-                type="text"
-                autoFocus
-                maxLength={15}
-                placeholder="Enter your name..."
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleSaveScore(); }}
-                className="w-full text-center text-xl p-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white mb-4 focus:outline-none focus:border-yellow-400"
-              />
-
-              <button
-                onClick={handleSaveScore}
-                disabled={isSubmitting || !playerName.trim()}
-                className="w-full bg-linear-to-r from-yellow-400 to-orange-500 text-white font-bold text-xl py-3 rounded-lg shadow-lg hover:opacity-90 disabled:opacity-50 transition-all cursor-pointer"
-              >
-                {isSubmitting ? 'Saving...' : 'Claim Score!'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* --- THE LEADERBOARD OVERLAY --- */}
-        {showLeaderboard && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4">
-            <div className="bg-card-light dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-md max-h-[90%] flex flex-col overflow-hidden">
-              <div className="p-4 bg-linear-to-r from-yellow-400 to-orange-500 flex justify-between items-center text-white">
-                <h2 className="text-2xl font-bold">🏆 Top Players</h2>
-                <button onClick={() => setShowLeaderboard(false)} className="text-white hover:text-gray-200 text-3xl leading-none cursor-pointer">&times;</button>
-              </div>
-              
-              <div className="overflow-y-auto p-4 flex-1">
-                {leaderboardData.length === 0 ? (
-                  <p className="text-center text-text-muted-light dark:text-text-muted-dark py-8 font-bold animate-pulse">Loading scores...</p>
-                ) : (
-                  <ul className="space-y-2">
-                    {leaderboardData.map((entry, i) => (
-                      <li key={entry.id} className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                        <span className="font-bold flex items-center gap-2 text-text-main-light dark:text-text-main-dark">
-                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : <span className="w-5 text-center text-gray-500">{i + 1}</span>}
-                          {entry.player_name}
-                        </span>
-                        <span className="font-mono font-bold text-yellow-500 text-lg">{entry.score}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
+      
+      {/* Floating Leaderboard Button */}
+      {(!gameStarted || gameOver) && !newHighScoreObj && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setShowLeaderboard(true); }}
+          className="absolute bottom-6 right-6 bg-yellow-400 text-yellow-900 px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform z-40"
+        >
+          🏆 Leaderboard
+        </button>
+      )}
+
+      {/* CELEBRATION OVERLAY */}
+      {newHighScoreObj && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs">
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {[...Array(25)].map((_, i) => {
+              const randomDuration = Math.random() * 3 + 2; 
+              const randomDelay = Math.random() * -5;
+              return (
+                <div key={i} className="absolute animate-float" style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  fontSize: `${Math.random() * 25 + 20}px`,
+                  animationDuration: `${randomDuration}s`,
+                  animationDelay: `${randomDelay}s`,
+                  animationDirection: Math.random() > 0.5 ? 'alternate' : 'alternate-reverse'
+                }}>
+                  {['🎉', '✨', '🏆', '⭐', '🔥'][Math.floor(Math.random() * 5)]}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="bg-card-light dark:bg-card-dark p-6 sm:p-8 rounded-2xl shadow-2xl text-center z-10 w-[90%] max-w-sm border-4 border-yellow-400">
+            <h2 className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-500 mb-2 animate-pulse">
+              NEW HIGH SCORE!
+            </h2>
+            <p className="text-5xl font-bold text-text-main-light dark:text-text-main-dark mb-6">
+              {newHighScoreObj.score}
+            </p>
+
+            <input
+              type="text"
+              autoFocus
+              maxLength={15}
+              placeholder="Enter your name..."
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveScore(); }}
+              className="w-full text-center text-xl p-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white mb-4 focus:outline-none focus:border-yellow-400"
+            />
+
+            <button
+              onClick={handleSaveScore}
+              disabled={isSubmitting || !playerName.trim()}
+              className="w-full bg-linear-to-r from-yellow-400 to-orange-500 text-white font-bold text-xl py-3 rounded-lg shadow-lg hover:opacity-90 disabled:opacity-50 transition-all cursor-pointer"
+            >
+              {isSubmitting ? 'Saving...' : 'Claim Score!'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* LEADERBOARD OVERLAY */}
+      {showLeaderboard && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4">
+          <div className="bg-card-light dark:bg-card-dark rounded-2xl shadow-2xl w-full max-w-md max-h-[85%] flex flex-col overflow-hidden">
+            <div className="p-4 bg-linear-to-r from-yellow-400 to-orange-500 flex justify-between items-center text-white">
+              <h2 className="text-2xl font-bold">🏆 Top Players</h2>
+              <button onClick={() => setShowLeaderboard(false)} className="text-white hover:text-gray-200 text-3xl leading-none cursor-pointer">&times;</button>
+            </div>
+            
+            <div className="overflow-y-auto p-4 flex-1">
+              {leaderboardData.length === 0 ? (
+                <p className="text-center text-text-muted-light dark:text-text-muted-dark py-8 font-bold animate-pulse">Loading scores...</p>
+              ) : (
+                <ul className="space-y-2">
+                  {leaderboardData.map((entry, i) => (
+                    <li key={entry.id} className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                      <span className="font-bold flex items-center gap-2 text-text-main-light dark:text-text-main-dark">
+                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : <span className="w-5 text-center text-gray-500">{i + 1}</span>}
+                        {entry.player_name}
+                      </span>
+                      <span className="font-mono font-bold text-yellow-500 text-lg">{entry.score}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <audio ref={deathAudioRef} src="/game-assets/death_sound.mp3" preload="auto" />
       <audio ref={jumpAudioRef} src="/game-assets/jump.wav" preload="auto" />
       <audio ref={soundtrackAudioRef} src="/game-assets/soundtrack.mp3" loop preload="auto" />
